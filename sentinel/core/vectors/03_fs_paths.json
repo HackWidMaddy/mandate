@@ -1,0 +1,77 @@
+{
+  "family": "fs_paths",
+  "base_dir_note": "All vectors use base_dir 'D:/proj'; relative probe paths MUST resolve against base_dir regardless of process cwd.",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "absolute read inside scope",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["workspace/**"], "write": [], "deny": []}},
+      "probe": {"kind": "path", "path": "D:/proj/workspace/src/app.py", "mode": "r"},
+      "expected": {"allowed": true, "rule": "filesystem.read:workspace/**"}
+    },
+    {
+      "name": "relative path resolves against base_dir not cwd",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["workspace/**"], "write": [], "deny": []}},
+      "probe": {"kind": "path", "path": "workspace/src/app.py", "mode": "r"},
+      "expected": {"allowed": true, "rule": "filesystem.read:workspace/**"}
+    },
+    {
+      "name": "write allowed only in write scope",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": [], "write": ["workspace/src/**"], "deny": []}},
+      "probe": {"kind": "path", "path": "D:/proj/workspace/src/fix.patch", "mode": "w"},
+      "expected": {"allowed": true, "rule": "filesystem.write:workspace/src/**"}
+    },
+    {
+      "name": "read grant does not imply write",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["workspace/**"], "write": [], "deny": []}},
+      "probe": {"kind": "path", "path": "D:/proj/workspace/README.md", "mode": "w"},
+      "expected": {"allowed": false, "rule": "fs-default-deny"}
+    },
+    {
+      "name": "outside workspace denied",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["workspace/**"], "write": [], "deny": []}},
+      "probe": {"kind": "path", "path": "D:/elsewhere/file.txt", "mode": "r"},
+      "expected": {"allowed": false, "rule": "fs-default-deny"}
+    },
+    {
+      "name": "explicit .env deny wins over read scope",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["**"], "write": [], "deny": ["**/.env"]}},
+      "probe": {"kind": "path", "path": "D:/proj/workspace/.env", "mode": "r"},
+      "expected": {"allowed": false, "rule": "filesystem.deny:**/.env"}
+    },
+    {
+      "name": "path traversal escapes read scope",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": [], "write": ["workspace/**"], "deny": []}},
+      "probe": {"kind": "path", "path": "workspace/../../elsewhere/x.txt", "mode": "w"},
+      "expected": {"allowed": false, "rule": "fs-default-deny"}
+    },
+    {
+      "name": "traversal into secrets hits explicit deny after normalization",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["workspace/**"], "write": [], "deny": ["**/secrets/**"]}},
+      "probe": {"kind": "path", "path": "workspace/../proj/secrets/vault.txt", "mode": "r"},
+      "expected": {"allowed": false, "rule": "filesystem.deny:**/secrets/**"}
+    },
+    {
+      "name": "extension deny catches key material",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["workspace/**"], "write": [], "deny": ["**/*.pem"]}},
+      "probe": {"kind": "path", "path": "D:/proj/workspace/server.pem", "mode": "r"},
+      "expected": {"allowed": false, "rule": "filesystem.deny:**/*.pem"}
+    },
+    {
+      "name": "doublestar matches across directories",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["workspace/**"], "write": [], "deny": []}},
+      "probe": {"kind": "path", "path": "D:/proj/workspace/a/b/c/deep.txt", "mode": "r"},
+      "expected": {"allowed": true, "rule": "filesystem.read:workspace/**"}
+    }
+  ]
+}

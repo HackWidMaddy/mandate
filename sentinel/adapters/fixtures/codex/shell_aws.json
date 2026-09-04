@@ -1,0 +1,9 @@
+{
+  "event": {
+    "session_id": "s-codex-001",
+    "type": "exec_approval",
+    "command": ["aws", "sts", "get-caller-identity"]
+  },
+  "expected_probe": { "kind": "spawn", "executable": "aws" },
+  "note": "equivalent to claude_code/bash_aws and cursor/terminal_aws"
+}

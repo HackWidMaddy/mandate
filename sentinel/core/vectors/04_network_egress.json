@@ -1,0 +1,42 @@
+{
+  "family": "network_egress",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "exact host allowed",
+      "manifest": {"network": {"allow": ["github.com"], "deny": []}},
+      "probe": {"kind": "host", "host": "github.com"},
+      "expected": {"allowed": true, "rule": "network.allow:github.com"}
+    },
+    {
+      "name": "wildcard subdomain allowed",
+      "manifest": {"network": {"allow": ["*.github.com"], "deny": []}},
+      "probe": {"kind": "host", "host": "api.github.com"},
+      "expected": {"allowed": true, "rule": "network.allow:*.github.com"}
+    },
+    {
+      "name": "wildcard spans multiple labels",
+      "manifest": {"network": {"allow": ["*.github.com"], "deny": []}},
+      "probe": {"kind": "host", "host": "a.b.github.com"},
+      "expected": {"allowed": true, "rule": "network.allow:*.github.com"}
+    },
+    {
+      "name": "bare domain not implied by wildcard subdomains",
+      "manifest": {"network": {"allow": ["*.github.com"], "deny": []}},
+      "probe": {"kind": "host", "host": "github.com"},
+      "expected": {"allowed": false, "rule": "net-default-deny"}
+    },
+    {
+      "name": "unlisted host default-denied",
+      "manifest": {"network": {"allow": ["github.com"], "deny": []}},
+      "probe": {"kind": "host", "host": "evil.example.com"},
+      "expected": {"allowed": false, "rule": "net-default-deny"}
+    },
+    {
+      "name": "metadata service explicitly denied",
+      "manifest": {"network": {"allow": ["*"], "deny": ["169.254.169.254"]}},
+      "probe": {"kind": "host", "host": "169.254.169.254"},
+      "expected": {"allowed": false, "rule": "network.deny:169.254.169.254"}
+    }
+  ]
+}

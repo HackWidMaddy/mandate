@@ -1,0 +1,24 @@
+{
+  "family": "deny_wins",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "explicit deny overrides broader allow",
+      "manifest": {"tools": {"allow": ["aws.*"], "deny": ["aws.iam.*"]}},
+      "probe": {"kind": "action", "action": "aws.iam.CreateUser"},
+      "expected": {"allowed": false, "rule": "tools.deny:aws.iam.*"}
+    },
+    {
+      "name": "allow still applies outside deny pattern",
+      "manifest": {"tools": {"allow": ["aws.*"], "deny": ["aws.iam.*"]}},
+      "probe": {"kind": "action", "action": "aws.s3.GetObject"},
+      "expected": {"allowed": true, "rule": "tools.allow:aws.*"}
+    },
+    {
+      "name": "exact deny beats wildcard allow",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": ["github.repo.delete"]}},
+      "probe": {"kind": "action", "action": "github.repo.delete"},
+      "expected": {"allowed": false, "rule": "tools.deny:github.repo.delete"}
+    }
+  ]
+}

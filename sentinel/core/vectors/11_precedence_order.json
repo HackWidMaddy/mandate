@@ -1,0 +1,37 @@
+{
+  "family": "precedence_order",
+  "note": "Canonical order: guardrails > temporal > explicit deny > crossing heuristic > allow > default-deny.",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "temporal gate outranks explicit deny for rule attribution",
+      "manifest": {"tools": {"allow": [], "deny": ["x.*"]}, "expires_at": "2001-01-01T00:00:00+00:00"},
+      "probe": {"kind": "action", "action": "x.y"},
+      "expected": {"allowed": false, "rule": "expiry"}
+    },
+    {
+      "name": "crossing heuristic outranks explicit allow",
+      "manifest": {"tools": {"allow": ["production.status.read"], "deny": []}},
+      "probe": {"kind": "action", "action": "production.status.read"},
+      "expected": {"allowed": false, "rule": "environment.action-crossing"}
+    },
+    {
+      "name": "deny outranks crossing-listed allow for plain actions",
+      "manifest": {"tools": {"allow": ["k8s.apply.staging"], "deny": ["k8s.apply.staging"]}},
+      "probe": {"kind": "action", "action": "k8s.apply.staging"},
+      "expected": {"allowed": false, "rule": "tools.deny:k8s.apply.staging"}
+    },
+    {
+      "name": "suffix production reference is crossed too",
+      "manifest": {"tools": {"allow": ["deploy.production"], "deny": []}},
+      "probe": {"kind": "action", "action": "deploy.production"},
+      "expected": {"allowed": false, "rule": "environment.action-crossing"}
+    },
+    {
+      "name": "embedded production reference is crossed too",
+      "manifest": {"tools": {"allow": ["deploy.to.production.now"], "deny": []}},
+      "probe": {"kind": "action", "action": "deploy.to.production.now"},
+      "expected": {"allowed": false, "rule": "environment.action-crossing"}
+    }
+  ]
+}

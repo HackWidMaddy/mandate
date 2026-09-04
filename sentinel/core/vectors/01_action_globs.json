@@ -1,0 +1,36 @@
+{
+  "family": "action_globs",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "wildcard allow grants nested action",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []}},
+      "probe": {"kind": "action", "action": "github.repo.read"},
+      "expected": {"allowed": true, "rule": "tools.allow:github.*"}
+    },
+    {
+      "name": "exact allow grants exact action",
+      "manifest": {"tools": {"allow": ["npm.install"], "deny": []}},
+      "probe": {"kind": "action", "action": "npm.install"},
+      "expected": {"allowed": true, "rule": "tools.allow:npm.install"}
+    },
+    {
+      "name": "unlisted action is default-denied",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []}},
+      "probe": {"kind": "action", "action": "slack.chat.postMessage"},
+      "expected": {"allowed": false, "rule": "default-deny"}
+    },
+    {
+      "name": "matching is case-insensitive",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []}},
+      "probe": {"kind": "action", "action": "GITHUB.Repo.READ"},
+      "expected": {"allowed": true, "rule": "tools.allow:github.*"}
+    },
+    {
+      "name": "empty manifest denies everything",
+      "manifest": {},
+      "probe": {"kind": "action", "action": "anything.at.all"},
+      "expected": {"allowed": false, "rule": "default-deny"}
+    }
+  ]
+}

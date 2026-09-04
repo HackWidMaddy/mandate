@@ -1,0 +1,10 @@
+{
+  "event": {
+    "session_id": "s-claude-001",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": { "command": "aws sts get-caller-identity" }
+  },
+  "expected_probe": { "kind": "spawn", "executable": "aws" },
+  "note": "credential-misuse class fixture; equivalent to cursor/terminal_aws and codex/shell_aws"
+}

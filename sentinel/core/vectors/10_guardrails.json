@@ -1,0 +1,39 @@
+{
+  "family": "guardrails",
+  "note": "Organization guardrails dominate every workflow-level rule.",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "guardrail deny overrides workflow allow",
+      "manifest": {"tools": {"allow": ["aws.*"], "deny": []}, "guardrails": ["aws.*"]},
+      "probe": {"kind": "action", "action": "aws.s3.GetObject"},
+      "expected": {"allowed": false, "rule": "guardrail"}
+    },
+    {
+      "name": "fs-prefixed guardrail blocks path even with broad grant",
+      "base_dir": "D:/proj",
+      "manifest": {"filesystem": {"read": ["**"], "write": [], "deny": []}, "guardrails": ["fs:**/prod/**"]},
+      "probe": {"kind": "path", "path": "D:/proj/service/prod/config.yaml", "mode": "r"},
+      "expected": {"allowed": false, "rule": "guardrail"}
+    },
+    {
+      "name": "net-prefixed guardrail dominates allow-all egress",
+      "manifest": {"network": {"allow": ["*"], "deny": []}, "guardrails": ["net:metadata.google.internal"]},
+      "probe": {"kind": "host", "host": "metadata.google.internal"},
+      "expected": {"allowed": false, "rule": "guardrail"}
+    },
+    {
+      "name": "guardrails evaluated before temporal denial",
+      "manifest": {"tools": {"allow": [], "deny": []}, "guardrails": ["aws.*"],
+                   "expires_at": "2001-01-01T00:00:00+00:00"},
+      "probe": {"kind": "action", "action": "aws.ec2.start"},
+      "expected": {"allowed": false, "rule": "guardrail"}
+    },
+    {
+      "name": "non-matching guardrail leaves normal flow intact",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []}, "guardrails": ["aws.*"]},
+      "probe": {"kind": "action", "action": "github.repo.read"},
+      "expected": {"allowed": true, "rule": "tools.allow:github.*"}
+    }
+  ]
+}

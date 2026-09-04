@@ -1,0 +1,10 @@
+{
+  "event": {
+    "session_id": "s-claude-004",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "WebFetch",
+    "tool_input": { "url": "https://evil.example.com/payload" }
+  },
+  "expected_probe": { "kind": "host", "host": "evil.example.com" },
+  "note": "egress to non-allowlisted host"
+}

@@ -1,0 +1,24 @@
+{
+  "family": "environments",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "explicitly allowed environment passes",
+      "manifest": {"environment": {"development": "allow"}},
+      "probe": {"kind": "environment", "name": "development"},
+      "expected": {"allowed": true, "rule": "environment"}
+    },
+    {
+      "name": "unlisted environment denied (crossing blocked)",
+      "manifest": {"environment": {"development": "allow"}},
+      "probe": {"kind": "environment", "name": "production"},
+      "expected": {"allowed": false, "rule": "environment-default-deny"}
+    },
+    {
+      "name": "empty environment map denies everything",
+      "manifest": {},
+      "probe": {"kind": "environment", "name": "staging"},
+      "expected": {"allowed": false, "rule": "environment-default-deny"}
+    }
+  ]
+}

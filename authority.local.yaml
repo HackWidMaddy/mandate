@@ -1,0 +1,62 @@
+schema_version: '1.0'
+principal:
+  agent: claude-code
+task:
+  repo: acme/backend
+  issue: 482
+  objective: fix_and_open_pr
+  raw: 'Fix GitHub issue #482 in acme/backend.
+
+    Run tests and create a pull request.
+
+    Do not deploy.'
+mandate_id: null
+human_subject: null
+tools:
+  allow:
+  - github.repo.read
+  - github.branch.create
+  - github.commit.write
+  - github.pull_request.create
+  - ci.status.read
+  - npm.*
+  deny:
+  - aws.*
+  - github.repository.delete
+  - github.workflow.modify
+  - github.secrets.read
+  - github.pull_request.merge
+  - kubernetes.*
+  - slack.*
+  - datadog.*
+  - production.*
+filesystem:
+  read:
+  - workspace/**
+  write:
+  - workspace/**
+  deny:
+  - '**/.env'
+  - '**/.ssh/**'
+  - '**/.aws/**'
+  - '**/secrets/**'
+  - '**/*.pem'
+network:
+  allow:
+  - github.com
+  - registry.npmjs.org
+  deny:
+  - 169.254.169.254
+  - metadata.google.internal
+delegation:
+  max_depth: 1
+  parent_mandate: null
+  depth: 0
+environment:
+  development: allow
+constraints: []
+guardrails: []
+approvals: []
+expiry_minutes: 60
+issued_at: '2026-09-04T05:56:27.304214+00:00'
+expires_at: '2026-09-04T06:56:27.304214+00:00'

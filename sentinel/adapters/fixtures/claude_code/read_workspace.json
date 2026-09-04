@@ -1,0 +1,10 @@
+{
+  "event": {
+    "session_id": "s-claude-002",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Read",
+    "tool_input": { "file_path": "D:/mandate/workspace/ISSUE_482.md" }
+  },
+  "expected_probe": { "kind": "path", "path": "D:/mandate/workspace/ISSUE_482.md", "mode": "r" },
+  "note": "benign workspace read"
+}

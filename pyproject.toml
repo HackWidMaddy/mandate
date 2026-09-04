@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentinel-authority"
+version = "0.1.0"
+description = "Sentinel Authority - CI/CD for AI-agent permissions. Derive, verify and compile minimum authority for agent workflows."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = ["PyYAML>=6.0", "cryptography>=42"]
+
+[project.optional-dependencies]
+cloud = ["fastapi>=0.110", "uvicorn[standard]>=0.27", "PyJWT>=2.8", "httpx>=0.26"]
+
+[project.scripts]
+sentinel = "sentinel.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["sentinel*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

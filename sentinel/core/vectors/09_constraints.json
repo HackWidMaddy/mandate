@@ -1,0 +1,51 @@
+{
+  "family": "constraints",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "satisfied neq constraint permits action",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []},
+                   "constraints": [{"action": "github.pull_request.create", "param": "base", "op": "neq", "value": "main"}]},
+      "probe": {"kind": "action", "action": "github.pull_request.create", "params": {"base": "feature/x"}},
+      "expected": {"allowed": true, "rule": "tools.allow:github.*"}
+    },
+    {
+      "name": "violated constraint blocks otherwise-allowed action",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []},
+                   "constraints": [{"action": "github.pull_request.create", "param": "base", "op": "neq", "value": "main"}]},
+      "probe": {"kind": "action", "action": "github.pull_request.create", "params": {"base": "main"}},
+      "expected": {"allowed": false, "rule": "constraint.violated"}
+    },
+    {
+      "name": "missing parameter fails closed",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []},
+                   "constraints": [{"action": "github.pull_request.*", "param": "base", "op": "neq", "value": "main"}]},
+      "probe": {"kind": "action", "action": "github.pull_request.create", "params": {}},
+      "expected": {"allowed": false, "rule": "constraint.missing-params"}
+    },
+    {
+      "name": "in operator restricts values",
+      "manifest": {"constraints": [{"action": "github.commit.write", "param": "repo", "op": "in", "value": ["acme/backend"]}]},
+      "probe": {"kind": "constraint", "action": "github.commit.write", "params": {"repo": "other/repo"}},
+      "expected": {"allowed": false, "rule": "constraint.violated"}
+    },
+    {
+      "name": "in operator accepts listed value",
+      "manifest": {"constraints": [{"action": "github.commit.write", "param": "repo", "op": "in", "value": ["acme/backend"]}]},
+      "probe": {"kind": "constraint", "action": "github.commit.write", "params": {"repo": "acme/backend"}},
+      "expected": {"allowed": true, "rule": "constraints.satisfied"}
+    },
+    {
+      "name": "matches operator supports globs",
+      "manifest": {"constraints": [{"action": "aws.s3.PutObject", "param": "key", "op": "matches", "value": "builds/*"}]},
+      "probe": {"kind": "constraint", "action": "aws.s3.PutObject", "params": {"key": "artifacts/evil"}},
+      "expected": {"allowed": false, "rule": "constraint.violated"}
+    },
+    {
+      "name": "constraints scoped by action glob do not leak",
+      "manifest": {"constraints": [{"action": "aws.*", "param": "region", "op": "eq", "value": "us-east-1"}]},
+      "probe": {"kind": "constraint", "action": "github.repo.read", "params": {}},
+      "expected": {"allowed": true, "rule": "constraints.satisfied"}
+    }
+  ]
+}

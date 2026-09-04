@@ -1,0 +1,54 @@
+# Example PR workflow: authority gate for agent-policy changes.
+#
+# Copy this file into .github/workflows/authority-gate.yml in the repo that
+# stores your Authority Manifests, then adjust `manifest-path` and the
+# install source inside templates/ci/action.yml.
+
+name: authority-gate
+
+on:
+  pull_request:
+    paths:
+      - '**/authority*.yaml'
+      - '**/authority*.yml'
+
+permissions:
+  contents: read
+  pull-requests: write   # needed only for the auto-comment step
+
+jobs:
+  authority-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # base manifest resolution needs history
+
+      - name: Sentinel authority diff
+        id: gate
+        uses: ./templates/ci       # or <org>/sentinel-authority-action@v1
+        with:
+          new-manifest: authority.yaml
+          fail-on: reject
+
+      - name: Comment on PR when the gate fails
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('sentinel-authority-comment.md', 'utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+
+      - name: Upload comment artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinel-authority-comment
+          path: sentinel-authority-comment.md
+          if-no-files-found: ignore

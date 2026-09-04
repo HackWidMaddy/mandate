@@ -1,0 +1,75 @@
+name: 'Sentinel Authority Gate'
+description: >
+  Semantic authority diff + adversarial policy tests on pull requests.
+  Fails the check when a change expands agent privilege without justification.
+author: 'Sentinel Authority'
+
+inputs:
+  old-manifest:
+    description: 'Base manifest (defaults to origin/main copy of NEW path)'
+    required: false
+    default: ''
+  new-manifest:
+    description: 'Candidate manifest file'
+    required: true
+    default: 'authority.yaml'
+  fail-on:
+    description: 'Gate threshold: reject | review'
+    required: false
+    default: 'reject'
+  comment-file:
+    description: 'Where to write the PR-comment markdown body on failure'
+    required: false
+    default: 'sentinel-authority-comment.md'
+
+outputs:
+  verdict:
+    description: 'Semantic diff verdict line'
+    value: ${{ steps.gate.outputs.verdict }}
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install Sentinel Authority
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        # Consumers: replace with your pinned install, e.g.
+        #   pip install sentinel-authority==0.2.0
+        #   or pip install git+https://github.com/<you>/sentinel-authority.git
+        pip install sentinel-authority
+    - name: Resolve base manifest
+      id: base
+      shell: bash
+      env:
+        OLD_INPUT: ${{ inputs.old-manifest }}
+        NEW_PATH: ${{ inputs.new-manifest }}
+      run: |
+        if [ -n "$OLD_INPUT" ]; then
+          echo "path=$OLD_INPUT" >> "$GITHUB_OUTPUT"
+        else
+          git show "origin/${{ github.base_ref }}:$NEW_PATH" > /tmp/base-authority.yaml 2>/dev/null \
+            || cp "$NEW_PATH" /tmp/base-authority.yaml
+          echo "path=/tmp/base-authority.yaml" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Run gate
+      id: gate
+      shell: bash
+      env:
+        COMMENT_FILE: ${{ inputs.comment-file }}
+      run: |
+        set +e
+        sentinel ci-check \
+          --old "${{ steps.base.outputs.path }}" \
+          --new "${{ inputs.new-manifest }}" \
+          --fail-on "${{ inputs.fail-on }}" \
+          --comment-file "$COMMENT_FILE"
+        code=$?
+        echo "verdict=$(grep -m1 'Verdict' "$COMMENT_FILE" 2>/dev/null || echo 'see logs')" >> "$GITHUB_OUTPUT"
+        if [ -f "$COMMENT_FILE" ] && [ -n "$GITHUB_STEP_SUMMARY" ]; then
+          cat "$COMMENT_FILE" >> "$GITHUB_STEP_SUMMARY"
+        fi
+        exit $code

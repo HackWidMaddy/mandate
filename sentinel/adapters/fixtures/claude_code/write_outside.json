@@ -1,0 +1,10 @@
+{
+  "event": {
+    "session_id": "s-claude-003",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Write",
+    "tool_input": { "file_path": "C:/Users/dev/.ssh/authorized_keys" }
+  },
+  "expected_probe": { "kind": "path", "path": "C:/Users/dev/.ssh/authorized_keys", "mode": "w" },
+  "note": "outside workspace + .ssh deny pattern"
+}

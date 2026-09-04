@@ -1,0 +1,40 @@
+{
+  "family": "temporal",
+  "now_note": "Runner evaluates all vectors at a fixed instant: 2026-08-25T12:00:00+00:00.",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "expired manifest authorizes nothing",
+      "manifest": {"tools": {"allow": ["*"], "deny": []}, "expires_at": "2001-01-01T00:00:00+00:00"},
+      "probe": {"kind": "action", "action": "anything.ok"},
+      "expected": {"allowed": false, "rule": "expiry"}
+    },
+    {
+      "name": "future authority is inert before not_before",
+      "manifest": {"tools": {"allow": ["*"], "deny": []}, "not_before": "2099-01-01T00:00:00+00:00"},
+      "probe": {"kind": "action", "action": "anything.ok"},
+      "expected": {"allowed": false, "rule": "not_before"}
+    },
+    {
+      "name": "valid window allows normally",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []},
+                   "not_before": "2026-01-01T00:00:00+00:00",
+                   "expires_at": "2099-01-01T00:00:00+00:00"},
+      "probe": {"kind": "action", "action": "github.repo.read"},
+      "expected": {"allowed": true, "rule": "tools.allow:github.*"}
+    },
+    {
+      "name": "temporal gate applies to filesystem too",
+      "manifest": {"filesystem": {"read": ["**"], "write": [], "deny": []},
+                   "expires_at": "2001-01-01T00:00:00+00:00"},
+      "probe": {"kind": "path", "path": "D:/proj/any.txt", "mode": "r"},
+      "expected": {"allowed": false, "rule": "expiry"}
+    },
+    {
+      "name": "no temporal fields means no temporal denial",
+      "manifest": {"tools": {"allow": ["x.*"], "deny": []}},
+      "probe": {"kind": "action", "action": "x.y"},
+      "expected": {"allowed": true, "rule": "tools.allow:x.*"}
+    }
+  ]
+}

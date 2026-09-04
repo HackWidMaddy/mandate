@@ -1,0 +1,42 @@
+{
+  "family": "process_spawn",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "spawn denied when no shell authority exists",
+      "manifest": {"tools": {"allow": ["github.*"], "deny": []}},
+      "probe": {"kind": "spawn", "executable": "bash"},
+      "expected": {"allowed": false, "rule": "spawn-default-deny"}
+    },
+    {
+      "name": "spawn of denied tool reports the explicit deny",
+      "manifest": {"tools": {"allow": [], "deny": ["aws.*"]}},
+      "probe": {"kind": "spawn", "executable": "aws.exe"},
+      "expected": {"allowed": false, "rule": "tools.deny:aws.*"}
+    },
+    {
+      "name": "scoped shell grant allows its binary",
+      "manifest": {"tools": {"allow": ["shell.git"], "deny": []}},
+      "probe": {"kind": "spawn", "executable": "git"},
+      "expected": {"allowed": true, "rule": "tools.allow:shell.git"}
+    },
+    {
+      "name": "scoped shell grant does not leak to other binaries",
+      "manifest": {"tools": {"allow": ["shell.git"], "deny": []}},
+      "probe": {"kind": "spawn", "executable": "curl"},
+      "expected": {"allowed": false, "rule": "spawn-default-deny"}
+    },
+    {
+      "name": "guardrail blocks every spawn regardless of grants",
+      "manifest": {"tools": {"allow": ["shell.*"], "deny": []}, "guardrails": ["process.spawn"]},
+      "probe": {"kind": "spawn", "executable": "python3"},
+      "expected": {"allowed": false, "rule": "guardrail"}
+    },
+    {
+      "name": "full path executable resolved by basename",
+      "manifest": {"tools": {"allow": ["shell.git"], "deny": []}},
+      "probe": {"kind": "spawn", "executable": "/usr/bin/git"},
+      "expected": {"allowed": true, "rule": "tools.allow:shell.git"}
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "family": "delegation",
+  "semantics_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "delegation within max_depth allowed",
+      "manifest": {"delegation": {"max_depth": 1}},
+      "probe": {"kind": "delegation", "depth": 1},
+      "expected": {"allowed": true, "rule": "delegation"}
+    },
+    {
+      "name": "delegation beyond max_depth denied",
+      "manifest": {"delegation": {"max_depth": 1}},
+      "probe": {"kind": "delegation", "depth": 2},
+      "expected": {"allowed": false, "rule": "delegation"}
+    },
+    {
+      "name": "zero depth forbids all sub-agents",
+      "manifest": {},
+      "probe": {"kind": "delegation", "depth": 1},
+      "expected": {"allowed": false, "rule": "delegation"}
+    },
+    {
+      "name": "expired parent cannot delegate",
+      "manifest": {"delegation": {"max_depth": 3}, "expires_at": "2001-01-01T00:00:00+00:00"},
+      "probe": {"kind": "delegation", "depth": 1},
+      "expected": {"allowed": false, "rule": "expiry"}
+    }
+  ]
+}

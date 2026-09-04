@@ -1,0 +1,14 @@
+{
+  "event": {
+    "session_id": "s-claude-005",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "mcp__github__create_pull_request",
+    "tool_input": { "base": "main", "title": "fix 482" }
+  },
+  "expected_probe": {
+    "kind": "action",
+    "action": "github.create_pull_request",
+    "params": { "base": "main", "title": "fix 482" }
+  },
+  "note": "MCP tool call -> action probe with argument constraints visible"
+}

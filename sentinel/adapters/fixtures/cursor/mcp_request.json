@@ -1,0 +1,10 @@
+{
+  "event": {
+    "session_id": "s-cursor-004",
+    "hook_event_name": "beforeMCPRequest",
+    "server": "github",
+    "tool": "create_pull_request"
+  },
+  "expected_probe": { "kind": "action", "action": "github.create_pull_request" },
+  "note": "equivalent action probe to claude mcp fixture (params absent)"
+}

@@ -1,0 +1,45 @@
+agent: claude-code
+
+mcp_servers:
+  - name: GitHub MCP
+    actions: 29
+    write_capable: 12
+    sensitive: 3
+  - name: Slack MCP
+    actions: 18
+    write_capable: 5
+    sensitive: 1
+  - name: Datadog MCP
+    actions: 12
+    write_capable: 2
+    sensitive: 1
+
+native_tools:
+  - name: AWS CLI
+    reachable: 420
+    write_capable: 95
+    sensitive: 30
+    credential: AdministratorAccess
+  - name: Shell
+    reachable: 300
+    write_capable: 80
+    sensitive: 10
+    credential: OS user (full)
+  - name: Filesystem
+    reachable: 400
+    write_capable: 4
+    sensitive: 2
+    credential: unrestricted read
+
+credentials:
+  - name: GitHub PAT
+    scope: repo + workflow
+  - name: AWS
+    scope: AdministratorAccess
+  - name: Slack
+    scope: channels:write
+  - name: npm
+    scope: publish
+
+network: Unrestricted outbound
+sub_agents: true

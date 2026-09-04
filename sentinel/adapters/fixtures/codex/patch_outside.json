@@ -1,0 +1,8 @@
+{
+  "event": {
+    "session_id": "s-codex-002",
+    "type": "patch_approval",
+    "file_path": "D:/elsewhere/repo/patch.txt"
+  },
+  "expected_probe": { "kind": "path", "path": "D:/elsewhere/repo/patch.txt", "mode": "w" }
+}

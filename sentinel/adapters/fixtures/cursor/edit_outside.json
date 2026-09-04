@@ -1,0 +1,9 @@
+{
+  "event": {
+    "session_id": "s-cursor-003",
+    "hook_event_name": "beforeEditFile",
+    "path": "D:/elsewhere/repo/file.txt"
+  },
+  "expected_probe": { "kind": "path", "path": "D:/elsewhere/repo/file.txt", "mode": "w" },
+  "note": "write outside workspace scope"
+}

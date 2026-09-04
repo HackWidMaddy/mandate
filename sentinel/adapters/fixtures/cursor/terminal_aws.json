@@ -1,0 +1,10 @@
+{
+  "event": {
+    "session_id": "s-cursor-001",
+    "cursor_version": "pinned-contract-2026-08",
+    "hook_event_name": "beforeShellExecution",
+    "command": "aws sts get-caller-identity"
+  },
+  "expected_probe": { "kind": "spawn", "executable": "aws" },
+  "note": "equivalent to claude_code/bash_aws and codex/shell_aws"
+}
